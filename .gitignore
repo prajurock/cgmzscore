@@ -16,4 +16,5 @@ logs/*
 # eclipse stuff
 .settings
 .DS_Store
-build
+build/*
+cgmzscore.egg-info/*
