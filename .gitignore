@@ -18,3 +18,4 @@ logs/*
 .DS_Store
 build/*
 cgmzscore.egg-info/*
+dist/*
