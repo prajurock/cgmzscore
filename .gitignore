@@ -16,3 +16,4 @@ logs/*
 # eclipse stuff
 .settings
 .DS_Store
+build
