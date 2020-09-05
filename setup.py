@@ -2,7 +2,7 @@ from setuptools import setup,find_packages
 
 setup(
     name='cgmzscore',
-    version='1.0.0',
+    version='1.0.5',
     license='BSD',
 
 
@@ -12,8 +12,8 @@ setup(
     packages=find_packages(),
     include_package_data=True,
 
-    description="Calculate z-scores of anthropometric measurements based on WHO",
-    long_description=open('README.md').read(),
+    description="z-scores of anthropometric measurements of children below 5 years  based on WHO",
+    long_description=open('README').read(),
 
      classifiers=[
         'Intended Audience :: Healthcare Industry',

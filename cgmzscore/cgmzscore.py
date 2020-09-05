@@ -1,6 +1,6 @@
 import os
 from decimal import Decimal as D
-from . import exceptions
+import exceptions
 import json
 import logging
 
@@ -141,12 +141,81 @@ class Calculator():
 
     def zScore_wfa(self,weight=None,muac=None,age_in_months=None,sex=None,height=None):
         return self.z_score_measurement('wfa',weight=weight,muac=None,age_in_months=age_in_months,sex=sex,height=None)
+
     def zScore_wfl(self,weight=None,muac=None,age_in_months=None,sex=None,height=None):
+        if(D(age_in_months)>24):
+            return self.zScore_wfh(weight,muac,age_in_months,sex,height)
         return self.z_score_measurement('wfl',weight=weight,muac=None,age_in_months=age_in_months,sex=sex,height=height)
+
     def zScore_wfh(self,weight=None,muac=None,age_in_months=None,sex=None,height=None):
+        if(D(age_in_months) <= 24):
+            return self.zScore_wfl(weight,muac,age_in_months,sex,height)
         return self.z_score_measurement('wfh',weight=weight,muac=None,age_in_months=age_in_months,sex=sex,height=height)
+
     def zScore_lhfa(self,weight=None,muac=None,age_in_months=None,sex=None,height=None):
         return self.z_score_measurement('lhfa',weight=None,muac=None,age_in_months=age_in_months,sex=sex,height=height)
+        
+    def zScore(self,weight=None,muac=None,age_in_months=None,sex=None,height=None):
+        wfa=self.zScore_wfa(weight=weight,age_in_months=age_in_months,sex=sex)
+        dummy=''
+        if(D(age_in_months)>24):
+            dummy='zScore_wfh'
+            wfl=self.zScore_wfh(weight=weight,age_in_months=age_in_months,sex=sex,height=height)
+        else:
+            dummy='zScore_wfl'
+            wfl=self.zScore_wfl(weight=weight,age_in_months=age_in_months,sex=sex,height=height)
+        lhfa=self.zScore_lhfa(age_in_months=age_in_months,sex=sex,height=height)
+        zscore=json.dumps({'zScore_wfa':wfa,dummy:wfl,"zScore_lhfa":lhfa})
+        return zscore
+
+    def zScore_withclass(self,weight=None,muac=None,age_in_months=None,sex=None,height=None):
+        wfa=self.zScore_wfa(weight=weight,age_in_months=age_in_months,sex=sex)
+        if wfa < -3:
+            class_wfa='Severly Under-weight'
+        elif wfa >= -3 and wfa < -2:
+            class_wfa='Moderately Under-weight'
+        else:
+            class_wfa='Healthy'
+
+        dummy=''
+        dummy_class=""
+        if(D(age_in_months)>24):
+            dummy='zScore_wfh'
+            dummy_class="class_wfh"
+            wfl=self.zScore_wfh(weight=weight,age_in_months=age_in_months,sex=sex,height=height)
+        else:
+            dummy='zScore_wfl'
+            dummy_class="class_wfl"
+            wfl=self.zScore_wfl(weight=weight,age_in_months=age_in_months,sex=sex,height=height)
+        if wfl < -3:
+            class_wfl='Severly Stunted'
+        elif wfl >= -3 and wfa < -2:
+            class_wfl='Moderately Stunted'
+        else:
+            class_wfl='Healthy'
+
+        lhfa=self.zScore_lhfa(age_in_months=age_in_months,sex=sex,height=height)
+        class_lhfa=self.SAM_MAM(weight,muac,age_in_months,sex,height)
+
+        zscore=json.dumps({'zScore_wfa':wfa,'class_wfa':class_wfa,dummy:wfl,dummy_class:class_wfl,'zScore_lhfa':lhfa,'class_lhfa':class_lhfa})
+        return zscore
+
+    def SAM_MAM(self,weight=None,muac=None,age_in_months=None,sex=None,height=None):
+        assert muac is not None
+
+        if(D(age_in_months)>24):
+            wfl=self.zScore_wfh(weight=weight,age_in_months=age_in_months,sex=sex,height=height)
+        else:
+            wfl=self.zScore_wfl(weight=weight,age_in_months=age_in_months,sex=sex,height=height)
+        if(wfl < -3 or D(muac)<11.5):
+            return "SAM"
+        elif ((wfl >= -3 and wfl<-2) or D(muac)<12.5):
+            return "MAM"
+        else:
+            return "Healthy"
+
+
+
     
 
     def z_score_measurement(self,chart,weight,muac,age_in_months,sex,height):
@@ -221,7 +290,7 @@ class Calculator():
 
             zScore=3+((y-SD3pos)/SD23pos)
 
-            return zScore.quantize(D('0.01'))
+            zScore=float(zScore.quantize(D('0.01')))
 
         elif(zScore<-3):
             SD2neg=calc_stdev(-2)
@@ -230,7 +299,14 @@ class Calculator():
             SD23neg=SD2neg-SD3neg
 
             zScore=-3+((y-SD3neg)/SD23neg)
-            return zScore.quantize(D('0.01'))
+            zScore=float(zScore.quantize(D('0.01')))
 
         else:
-            return zScore.quantize(D('0.01'))
+            zScore=float(zScore.quantize(D('0.01')))
+            
+        return zScore
+
+
+
+cal=Calculator()
+print(cal.zScore_withclass(weight="7.853",age_in_months="16",sex="M",height="73",muac="12.5"))

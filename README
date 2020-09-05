@@ -1,12 +1,18 @@
-# Z score
+Z score
 
 z-scores of anthropometric measurements of children below 5 years  based on WHO
 
-## Installation
+REQUIREMENTS
+============
 
-pip install zscore
+* Python 2.7.x, Python 3.x or later
 
-## Usage
+INSTALLATION
+============
+`pip install cgmzscore`
+
+EXAMPLE USAGE
+=============
 
 from cgmzscore import Calculator
 calculator=Calculator()
@@ -21,6 +27,7 @@ v=calculator.zScore_lhfa(weight="7.853",muac="13.5",age_in_months='16',sex='M',h
 v=calculator.zScore(weight="7.853",muac="13.5",age_in_months='16',sex='M',height='73')-->Use to calculate all three z score
 v=calculator.zScore_withclass(weight="7.853",muac="13.5",age_in_months='16',sex='M',height='73')-->Use to calculate all three z score along with class
 v=calculator.SAM_MAM(weight="7.853",muac="13.5",age_in_months='16',sex='M',height='73')-->Use to find child is SAM/MAM/Healthy
+
 
 
 
