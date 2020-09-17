@@ -1,6 +1,6 @@
 import os
 from decimal import Decimal as D
-import exceptions
+from . import exceptions
 import json
 import logging
 
@@ -159,13 +159,13 @@ class Calculator():
         wfa=self.zScore_wfa(weight=weight,age_in_months=age_in_months,sex=sex)
         dummy=''
         if(D(age_in_months)>24):
-            dummy='zScore_wfh'
+            dummy='Z_score_WFH'
             wfl=self.zScore_wfh(weight=weight,age_in_months=age_in_months,sex=sex,height=height)
         else:
-            dummy='zScore_wfl'
+            dummy='Z_score_WFL'
             wfl=self.zScore_wfl(weight=weight,age_in_months=age_in_months,sex=sex,height=height)
         lhfa=self.zScore_lhfa(age_in_months=age_in_months,sex=sex,height=height)
-        zscore=json.dumps({'zScore_wfa':wfa,dummy:wfl,"zScore_lhfa":lhfa})
+        zscore=json.dumps({'Z_score_WFA':wfa,dummy:wfl,"Z_score_HFA":lhfa})
         return zscore
 
     def zScore_withclass(self,weight=None,muac=None,age_in_months=None,sex=None,height=None):
@@ -180,24 +180,25 @@ class Calculator():
         dummy=''
         dummy_class=""
         if(D(age_in_months)>24):
-            dummy='zScore_wfh'
-            dummy_class="class_wfh"
+            dummy='Z_score_WFH'
+            dummy_class="Class_WFH"
             wfl=self.zScore_wfh(weight=weight,age_in_months=age_in_months,sex=sex,height=height)
         else:
-            dummy='zScore_wfl'
-            dummy_class="class_wfl"
+            dummy='Z_score_WFL'
+            dummy_class="Class_WFL"
             wfl=self.zScore_wfl(weight=weight,age_in_months=age_in_months,sex=sex,height=height)
-        if wfl < -3:
-            class_wfl='Severly Stunted'
-        elif wfl >= -3 and wfa < -2:
-            class_wfl='Moderately Stunted'
-        else:
-            class_wfl='Healthy'
+        class_wfl=self.SAM_MAM(weight,muac,age_in_months,sex,height)
+
 
         lhfa=self.zScore_lhfa(age_in_months=age_in_months,sex=sex,height=height)
-        class_lhfa=self.SAM_MAM(weight,muac,age_in_months,sex,height)
+        if lhfa < -3:
+            class_lhfa='Severly Stunted'
+        elif lhfa >= -3 and lhfa < -2:
+            class_lhfa='Moderately Stunted'
+        else:
+            class_lhfa='Healthy'
 
-        zscore=json.dumps({'zScore_wfa':wfa,'class_wfa':class_wfa,dummy:wfl,dummy_class:class_wfl,'zScore_lhfa':lhfa,'class_lhfa':class_lhfa})
+        zscore=json.dumps({'Z_score_WFA':wfa,'Class_WFA':class_wfa,dummy:wfl,dummy_class:class_wfl,'Z_score_HFA':lhfa,'Class_HFA':class_lhfa})
         return zscore
 
     def SAM_MAM(self,weight=None,muac=None,age_in_months=None,sex=None,height=None):
@@ -305,8 +306,3 @@ class Calculator():
             zScore=float(zScore.quantize(D('0.01')))
             
         return zScore
-
-
-
-cal=Calculator()
-print(cal.zScore_withclass(weight="7.853",age_in_months="16",sex="M",height="73",muac="12.5"))
