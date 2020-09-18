@@ -303,7 +303,4 @@ class Calculator(object):
 
         return zScore
 
-calculator=Calculator(logger_name='z_score_log.log', log_level="INFO")
-v=calculator.zScore_wfa(weight='7.853',muac='13.5',age_in_months='16',sex='M',height='73')
 
-print(v)
